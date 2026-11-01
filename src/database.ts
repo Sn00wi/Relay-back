@@ -1,4 +1,6 @@
 import { Pool } from 'pg';
+import { PrismaClient } from './generated/prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -25,7 +27,11 @@ pool.on('error', (err) => {
   console.error('Unexpected error on idle postgres client', err);
 });
 
+const adapter = new PrismaPg(pool)
+
+export const prisma = new PrismaClient({adapter: adapter})
+
 export async function checkDatabaseConnection(): Promise<void> {
-    const response = await pool.query('SELECT 1');
-    console.log('Connection success', response.rows[0]);
+  await prisma.$connect();
+  await prisma.$queryRaw`SELECT 1`
 }

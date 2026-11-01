@@ -25,7 +25,8 @@ async function startServer() {
 
   try {
     await checkDatabaseConnection();
-    
+    console.log('Connection success');
+
     app.listen(port, () => {
       console.log(`Exemple app listening on port ${port}`)
     });
