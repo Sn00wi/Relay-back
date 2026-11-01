@@ -1,4 +1,5 @@
 import express, { type Express, type Request, type Response } from 'express';  
+import { checkDatabaseConnection } from './database';
 const app: Express = express();
 const port = 3000;
 
@@ -19,6 +20,21 @@ app.post('/user/auth', (req: Request, res: Response) => {
   
 })
 
-app.listen(port, () => {
-  console.log(`Exemple app listening on port ${port}`)
-});
+
+async function startServer() {
+
+  try {
+    await checkDatabaseConnection();
+    
+    app.listen(port, () => {
+      console.log(`Exemple app listening on port ${port}`)
+    });
+  } catch (err) {
+    console.error('Server startup failed:', err);
+    process.exit(1);
+  }
+
+  
+}
+
+startServer();

@@ -12,8 +12,8 @@ services:
         - pgdata:/var/lib/postgresql/data
 
       environment:
-        POSTGRES_DB: relay
-        POSTGRES_USER: Sn0w1
+        POSTGRES_DB: ${PG_DB}
+        POSTGRES_USER: ${PG_USER}
         POSTGRES_PASSWORD: ${PG_PASSWORD}
   
     adminer:
