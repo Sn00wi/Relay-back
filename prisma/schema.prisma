@@ -14,6 +14,19 @@ model User {
   passwordHash String   @map("password_hash")
   name         String
   createdAt    DateTime @default(now()) @map("created_at")
-
+  sessions     Session[]
+  
   @@map("users")
+}
+
+model Session {
+id           String   @id @default(uuid())
+tokenHash    String   @unique @map("token_hash")
+userId       String   
+createdAt    DateTime @default(now()) @map("created_at")
+expiresAt    DateTime  
+user         User     @relation(fields: [userId], references:[id], onDelete: Cascade)   
+
+@@map("sessions")
+
 }

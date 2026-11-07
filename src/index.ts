@@ -1,8 +1,12 @@
 import express, { type Express, type Request, type Response } from 'express';  
-import { checkDatabaseConnection } from './database';
+import { checkDatabaseConnection, prisma } from './database';
+import { PrismaUserRepository } from './repositories/user.repository';
+import { AuthService } from './services/auth.service';
+import { ArgonHasher } from './security/password-hasher';
 const app: Express = express();
 const port = 3000;
 
+//позволяет express парсить json для req.body
 app.use(express.json());
 
 app.get('/health', (req: Request, res: Response) => {
@@ -19,6 +23,11 @@ app.post('/user/auth', (req: Request, res: Response) => {
   } 
   
 })
+
+
+const passwordHasher = new ArgonHasher()
+const userRepository = new PrismaUserRepository(prisma)
+const authService = new AuthService(userRepository, passwordHasher)
 
 
 async function startServer() {
