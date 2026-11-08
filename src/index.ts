@@ -3,6 +3,7 @@ import { checkDatabaseConnection, prisma } from './database';
 import { PrismaUserRepository } from './repositories/user.repository';
 import { AuthService } from './services/auth.service';
 import { ArgonHasher } from './security/password-hasher';
+
 const app: Express = express();
 const port = 3000;
 
