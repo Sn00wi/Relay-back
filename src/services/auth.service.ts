@@ -2,8 +2,7 @@ import type { UserRepository } from "../repositories/user.repository";
 import type { PasswordHasher } from "../security/password-hasher";
 
 export class AuthService {
-  // Получает готовый репозиторий и сохраняет ссылку на него.
-  // TypeScript проверяет его соответствие интерфейсу UserRepository.
+  //позволяет использовать методы объектов UserRepository и PasswordHasher
   constructor(private readonly userRepository: UserRepository, private readonly passwordHasher: PasswordHasher) { }
 
   async login(login: string, password: string) {
@@ -30,16 +29,16 @@ export class AuthService {
     const validUserName = forbiddenCharsRegex.test(createData.userName)
     
     if (!validUserName) {
-      throw new Error('Incorrect User Name')
+      throw new Error('Invalid username format')
     }
 
     const checkEmail = await this.userRepository.findByEmail(createData.email)
     const checkUserName = await this.userRepository.findByUserName(createData.userName)
     if (checkEmail) {
-      throw new Error('this email allrady exist')
+      throw new Error('This email is already registered')
     }
     if (checkUserName) {
-      throw new Error('this userName allrady exist')
+      throw new Error('This username is already taken')
     }
     
       const passwordHash = await this.passwordHasher.hashPassword(createData.password)
