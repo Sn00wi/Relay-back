@@ -1,9 +1,10 @@
 import type { UserRepository } from "../repositories/user.repository";
 import type { PasswordHasher } from "../security/password-hasher";
+import type { SessionService } from "./session.service";
 
 export class AuthService {
   //позволяет использовать методы объектов UserRepository и PasswordHasher
-  constructor(private readonly userRepository: UserRepository, private readonly passwordHasher: PasswordHasher) { }
+  constructor(private readonly userRepository: UserRepository, private readonly passwordHasher: PasswordHasher, private readonly sessionService: SessionService) { }
 
   async login(login: string, password: string) {
     const isEmail = login.includes('@');
@@ -21,7 +22,9 @@ export class AuthService {
     const checkPassword = await this.passwordHasher.verifyPassword(user.passwordHash, password)
     if (!checkPassword) {throw new Error(`Incorrect email or password`)}
 
-    return { id: user.id , email: user.email, nickName: user.nickName, userName: user.userName}
+    const { token } = await this.sessionService.createSession(user.id)
+    
+    return {token, user: {id: user.id , email: user.email, nickName: user.nickName, userName: user.userName}}
   }
 
   async registration(createData: { email: string, password: string, nickName: string, userName: string, }): Promise<void> { 

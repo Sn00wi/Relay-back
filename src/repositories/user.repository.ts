@@ -2,8 +2,12 @@ import { Prisma, PrismaClient, User } from '../generated/prisma/client';
 
 export interface UserRepository {
   findByEmail(email: string): Promise<User | null>;
-  create(data: { email: string; passwordHash: string; nickName: string, userName: string, }): Promise<User>
   findByUserName(userName: string): Promise<User | null>;
+  findById(id: string): Promise<User | null>;
+  // Частичное обновление разрешенных данных профиля пользователя
+  update(id: string, data: Partial<Pick<User, 'nickName' | 'email' | 'avatarKey'>>): Promise<User>
+  create(data: { email: string; passwordHash: string; nickName: string, userName: string, avatarKey?: string | null }): Promise<User>
+  delete(id: string): Promise<User>
 }
 
 //PrismaUserRepository реализует UserRepository, проверка наличия методов и совместимость их типов
@@ -19,8 +23,12 @@ export class PrismaUserRepository implements UserRepository{
   async findByUserName(userName: string): Promise<User | null> {
     return this.prisma.user.findUnique({ where: { userName } });
   }
+
+  async findById(id: string): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { id } });
+  }
   
-  async create(data: { email: string; passwordHash: string; nickName: string, userName: string, }): Promise<User> {
+  async create(data: { email: string; passwordHash: string; nickName: string, userName: string, avatarKey?: string | null }): Promise<User> {
     try {
        return await this.prisma.user.create({ data });
     } catch (error) {
@@ -32,5 +40,13 @@ export class PrismaUserRepository implements UserRepository{
     throw error;
     }
   }
+
+  async update(id: string, data: Partial<Pick<User, 'nickName' | 'email' | 'avatarKey'>>): Promise<User> {
+    return this.prisma.user.update({where: {id}, data})
+  }
+
+  async delete(id: string): Promise<User> {
+    return this.prisma.user.delete({where: {id}})
+ }
 }
 

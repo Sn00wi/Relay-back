@@ -3,6 +3,8 @@ import { checkDatabaseConnection, prisma } from './database';
 import { PrismaUserRepository } from './repositories/user.repository';
 import { AuthService } from './services/auth.service';
 import { ArgonHasher } from './security/password-hasher';
+import { PrismaSessionRepository } from './repositories/session.repository';
+import { SessionService } from './services/session.service';
 
 const app: Express = express();
 const port = 3000;
@@ -25,10 +27,12 @@ app.post('/user/auth', (req: Request, res: Response) => {
   
 })
 
-
+// создание зависимостей 
 const passwordHasher = new ArgonHasher()
 const userRepository = new PrismaUserRepository(prisma)
-const authService = new AuthService(userRepository, passwordHasher)
+const prismaSessionRepository = new PrismaSessionRepository(prisma)
+const sessionService = new SessionService(prismaSessionRepository)
+const authService = new AuthService(userRepository, passwordHasher, sessionService)
 
 
 async function startServer() {
