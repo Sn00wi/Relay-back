@@ -622,8 +622,7 @@ export const SessionScalarFieldEnum = {
   id: 'id',
   tokenHash: 'tokenHash',
   userId: 'userId',
-  createdAt: 'createdAt',
-  expiresAt: 'expiresAt'
+  createdAt: 'createdAt'
 } as const
 
 export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]

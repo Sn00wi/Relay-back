@@ -1,7 +1,7 @@
 import { PrismaClient, Session } from "../generated/prisma/client";
 
 export interface SessionRepository {
-  create(data: { userId: string, tokenHash: string, expiresAt: Date }): Promise<Session>;
+  create(data: { userId: string, tokenHash: string }): Promise<Session>;
   findByTokenHash(tokenHash: string): Promise<Session | null>;
   deleteByTokenHash(tokenHash: string): Promise<void>;
 }
@@ -9,7 +9,7 @@ export interface SessionRepository {
 export class PrismaSessionRepository implements SessionRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
-  async create(data: { userId: string, tokenHash: string, expiresAt: Date}): Promise<Session> {
+  async create(data: { userId: string, tokenHash: string}): Promise<Session> {
     return this.prisma.session.create({data})
   }
 
