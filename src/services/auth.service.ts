@@ -1,10 +1,10 @@
-import type { UserRepository } from "../repositories/user.repository";
+import type { UserService } from "../services/user.service";
 import type { PasswordHasher } from "../security/password-hasher";
 import type { SessionService } from "./session.service";
 
 export class AuthService {
   //позволяет использовать методы объектов UserRepository и PasswordHasher
-  constructor(private readonly userRepository: UserRepository, private readonly passwordHasher: PasswordHasher, private readonly sessionService: SessionService) { }
+  constructor(private readonly userService: UserService, private readonly passwordHasher: PasswordHasher, private readonly sessionService: SessionService) { }
 
   async login(login: string, password: string) {
     const isEmail = login.includes('@');
@@ -12,9 +12,9 @@ export class AuthService {
     let user;
     
     if (isEmail) {
-        user = await this.userRepository.findByEmail(login);
+        user = await this.userService.getUserByEmail(login);
     } else {
-        user = await this.userRepository.findByUserName(login);
+        user = await this.userService.getUserByUserName(login);
     }
     
     if (!user) { throw new Error(`Incorrect email or password`) }
@@ -35,8 +35,8 @@ export class AuthService {
       throw new Error('Invalid username format')
     }
 
-    const checkEmail = await this.userRepository.findByEmail(createData.email)
-    const checkUserName = await this.userRepository.findByUserName(createData.userName)
+    const checkEmail = await this.userService.getUserByEmail(createData.email)
+    const checkUserName = await this.userService.getUserByUserName(createData.userName)
     if (checkEmail) {
       throw new Error('This email is already registered')
     }
@@ -51,7 +51,7 @@ export class AuthService {
           nickName: createData.nickName,
           userName: createData.userName,
         };
-      await this.userRepository.create(data)
+      await this.userService.createUser(data)
     
   }
 }

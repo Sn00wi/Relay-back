@@ -41,12 +41,33 @@ export class PrismaUserRepository implements UserRepository{
     }
   }
 
-  async update(id: string, data: Partial<Pick<User, 'nickName' | 'email' | 'avatarKey'>>): Promise<User> {
-    return this.prisma.user.update({where: {id}, data})
-  }
-
   async delete(id: string): Promise<User> {
-    return this.prisma.user.delete({where: {id}})
- }
+    try {
+      return await this.prisma.user.delete({where: {id}})
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === "P2025") {
+          throw new Error("user not found")
+        }
+      }
+      throw error
+    }
+  }
+  
+  async update(id: string, data: Partial<Pick<User, 'nickName' | 'email' | 'avatarKey'>>): Promise<User> {
+    try {
+      return await this.prisma.user.update({ where: { id }, data })  
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === "P2025") {
+          throw new Error("user not found")
+        } else if (error.code === "P2002") {
+          throw new Error("Email or username is already taken.", {cause: error})
+        }
+      }
+    
+      throw error
+    }
+  }
 }
 

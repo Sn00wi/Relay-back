@@ -5,6 +5,7 @@ import { AuthService } from './services/auth.service';
 import { ArgonHasher } from './security/password-hasher';
 import { PrismaSessionRepository } from './repositories/session.repository';
 import { SessionService } from './services/session.service';
+import { UserService } from './services/user.service';
 
 const app: Express = express();
 const port = 3000;
@@ -32,7 +33,8 @@ const passwordHasher = new ArgonHasher()
 const userRepository = new PrismaUserRepository(prisma)
 const prismaSessionRepository = new PrismaSessionRepository(prisma)
 const sessionService = new SessionService(prismaSessionRepository)
-const authService = new AuthService(userRepository, passwordHasher, sessionService)
+const userService = new UserService(userRepository)
+const authService = new AuthService(userService, passwordHasher, sessionService)
 
 
 async function startServer() {
