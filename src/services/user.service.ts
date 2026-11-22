@@ -5,7 +5,7 @@ export class UserService {
   constructor(private readonly userRepository: UserRepository) { }
 
   async getUserByEmail(email: string): Promise<User | null> {
-    const normalizedEmail = email?.trim()
+    const normalizedEmail = email?.trim().toLowerCase()
 
     return await this.userRepository.findByEmail(normalizedEmail)
   }
@@ -19,7 +19,7 @@ export class UserService {
   }
   
   async createUser(createData: { email: string, passwordHash: string, nickName: string, userName: string, avatarKey?: string | null }) {
-    const normalizedEmail = createData.email?.trim()
+    const normalizedEmail = createData.email?.trim().toLowerCase()
 
     createData.email = normalizedEmail
     await this.userRepository.create(createData)
@@ -31,7 +31,7 @@ export class UserService {
   
   async updateUser(id: string, data: Partial<Pick<User, 'nickName' | 'email' | 'avatarKey'>>) {
     if (data.email !== undefined) {
-      const normalizedEmail = data.email?.trim()
+      const normalizedEmail = data.email?.trim().toLowerCase()
       if (!normalizedEmail) {
         throw new Error('Email cannot be empty');
       }
