@@ -1,3 +1,4 @@
+import { AppError } from '../errors/AppError';
 import { Prisma, PrismaClient, User } from '../generated/prisma/client';
 
 export interface UserRepository {
@@ -34,7 +35,7 @@ export class PrismaUserRepository implements UserRepository{
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === "P2002") {
-          throw new Error("Email or username is already taken.", {cause: error})
+          throw new AppError(409, "Email or username is already taken.")
         }
       }
     throw error;
@@ -47,7 +48,7 @@ export class PrismaUserRepository implements UserRepository{
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === "P2025") {
-          throw new Error("user not found")
+          throw new AppError(404, "user not found")
         }
       }
       throw error
@@ -60,9 +61,9 @@ export class PrismaUserRepository implements UserRepository{
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === "P2025") {
-          throw new Error("user not found")
+          throw new AppError(404, "user not found")
         } else if (error.code === "P2002") {
-          throw new Error("Email or username is already taken.", {cause: error})
+          throw new AppError(409, "Email or username is already taken.")
         }
       }
     

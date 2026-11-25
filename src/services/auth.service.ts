@@ -1,6 +1,7 @@
 import type { UserService } from "../services/user.service";
 import type { PasswordHasher } from "../security/password-hasher";
 import type { SessionService } from "./session.service";
+import { AppError } from "../errors/AppError";
 
 export class AuthService {
   //позволяет использовать методы объектов UserRepository и PasswordHasher
@@ -17,10 +18,10 @@ export class AuthService {
         user = await this.userService.getUserByUserName(login);
     }
     
-    if (!user) { throw new Error(`Incorrect email or password`) }
+    if (!user) { throw new AppError(401, `Incorrect email or password`) }
 
     const checkPassword = await this.passwordHasher.verifyPassword(user.passwordHash, password)
-    if (!checkPassword) {throw new Error(`Incorrect email or password`)}
+    if (!checkPassword) {throw new AppError(401, `Incorrect email or password`)}
 
     const { token } = await this.sessionService.createSession(user.id)
     
@@ -32,16 +33,16 @@ export class AuthService {
     const validUserName = forbiddenCharsRegex.test(createData.userName)
     
     if (!validUserName) {
-      throw new Error('Invalid username format')
+      throw new AppError(422, 'Invalid username format')
     }
 
     const checkEmail = await this.userService.getUserByEmail(createData.email)
     const checkUserName = await this.userService.getUserByUserName(createData.userName)
     if (checkEmail) {
-      throw new Error('This email is already registered')
+      throw new AppError(409, 'This email is already registered')
     }
     if (checkUserName) {
-      throw new Error('This username is already taken')
+      throw new AppError(409, 'This username is already taken')
     }
     
       const passwordHash = await this.passwordHasher.hashPassword(createData.password)

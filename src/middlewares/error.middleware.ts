@@ -11,12 +11,17 @@ export const errorMiddleware = (
      return next(err);
   }
   
-  // обработка ошибок бизнеслогики 400, 401, 404, 409
+  // обработка ошибок бизнеслогики 400, 401, 404, 409 и тд
   if (err instanceof AppError) {
     res.status(err.statusCode).json({
       status: 'error',
       message: err.message,
     });
+    return;
+  }
+  // обработка синтаксической ошибки json 
+  if (err instanceof SyntaxError && 'type' in err && err.type === 'entity.parse.failed') {
+    res.status(400).json({ status: 'error', message: 'Invalid JSON' });
     return;
   }
 

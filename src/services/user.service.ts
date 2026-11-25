@@ -1,3 +1,4 @@
+import { AppError } from "../errors/AppError";
 import { User } from "../generated/prisma/client";
 import type { UserRepository } from "../repositories/user.repository";
 
@@ -19,8 +20,11 @@ export class UserService {
   }
   
   async createUser(createData: { email: string, passwordHash: string, nickName: string, userName: string, avatarKey?: string | null }) {
-    const normalizedEmail = createData.email?.trim().toLowerCase()
-
+      const normalizedEmail = createData.email?.trim().toLowerCase()
+      if (!normalizedEmail) {
+        throw new AppError(422, 'Email cannot be empty');
+    }
+    
     createData.email = normalizedEmail
     await this.userRepository.create(createData)
   }
@@ -33,11 +37,11 @@ export class UserService {
     if (data.email !== undefined) {
       const normalizedEmail = data.email?.trim().toLowerCase()
       if (!normalizedEmail) {
-        throw new Error('Email cannot be empty');
+        throw new AppError(422, 'Email cannot be empty');
       }
       const existing = await this.userRepository.findByEmail(normalizedEmail);
         if (existing && existing.id !== id) {
-          throw new Error('This email is already registered');
+          throw new AppError(409, 'This email is already registered');
       }
       data.email = normalizedEmail
     }

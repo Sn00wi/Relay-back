@@ -1,3 +1,4 @@
+import { AppError } from "../errors/AppError";
 import type { SessionRepository } from "../repositories/session.repository";
 import { hashSessionToken, generateSessionToken } from "../security/session-token";
 
@@ -20,7 +21,7 @@ export class SessionService {
     const session = await this.sessionRepository.findByTokenHash(tokenHash)
 
     if (!session) {
-      throw new Error('Invalid session')
+      throw new AppError(401, 'Invalid session')
     } 
 
     return {userId: session.userId}
