@@ -5,6 +5,7 @@ export interface UserRepository {
   findByEmail(email: string): Promise<User | null>;
   findByUserName(userName: string): Promise<User | null>;
   findById(id: string): Promise<User | null>;
+  findByUserNickName(nickName: string): Promise<User[]>
   // Частичное обновление разрешенных данных профиля пользователя
   update(id: string, data: Partial<Pick<User, 'nickName' | 'email' | 'avatarKey'>>): Promise<User>
   create(data: { email: string; passwordHash: string; nickName: string, userName: string, avatarKey?: string | null }): Promise<User>
@@ -28,7 +29,11 @@ export class PrismaUserRepository implements UserRepository{
   async findById(id: string): Promise<User | null> {
     return this.prisma.user.findUnique({ where: { id } });
   }
-  
+
+  async findByUserNickName(nickName: string): Promise<User[]> {
+    return this.prisma.user.findMany({where: {nickName}})
+  }
+
   async create(data: { email: string; passwordHash: string; nickName: string, userName: string, avatarKey?: string | null }): Promise<User> {
     try {
        return await this.prisma.user.create({ data });

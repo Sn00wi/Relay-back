@@ -15,8 +15,16 @@ export class UserService {
     return await this.userRepository.findByUserName(userName)
   }
   
-  async getUserById(id: string): Promise<User | null>  {
-    return await this.userRepository.findById(id)
+  async getUserById(id: string): Promise<User>  {
+    const user = await this.userRepository.findById(id)
+    if (!user) {
+      throw new AppError(404, 'User not found')
+    }
+    return user
+  }
+
+  async getByUserNickName(nickName: string): Promise<User[]> {
+    return await this.userRepository.findByUserNickName(nickName)
   }
   
   async createUser(createData: { email: string, passwordHash: string, nickName: string, userName: string, avatarKey?: string | null }) {
