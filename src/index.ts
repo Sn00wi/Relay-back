@@ -1,32 +1,17 @@
 import express, { type Express, type Request, type Response } from 'express';  
 import { checkDatabaseConnection, prisma } from './database';
-import { PrismaUserRepository } from './repositories/user.repository';
-import { AuthService } from './services/auth.service';
-import { ArgonHasher } from './security/password-hasher';
-import { PrismaSessionRepository } from './repositories/session.repository';
-import { SessionService } from './services/session.service';
-import { UserService } from './services/user.service';
+import { AuthService, UserService, SessionService } from './services';
+import { PrismaUserRepository, PrismaSessionRepository } from './repositories'; 
+import { ArgonHasher } from './security'; 
+import mainRoute from './routes/mainRoute';
+import { errorMiddleware } from './middlewares/error.middleware';
+
 
 const app: Express = express();
-const port = 3000;
-
 //позволяет express парсить json для req.body
 app.use(express.json());
+app.use('/relay', mainRoute);
 
-app.get('/health', (req: Request, res: Response) => {
-  res.json({status:'ok'})
-});   
-
-app.post('/user/auth', (req: Request, res: Response) => {
-  const { email, password } = req.body
-
-  if (email == 111 && password == 11) {
-    res.json({success:true, message: 'Welcome'})
-  } else {
-    res.status(401).json({success:false, message:'login error'})
-  } 
-  
-})
 
 // создание зависимостей 
 const passwordHasher = new ArgonHasher()
@@ -36,22 +21,4 @@ const sessionService = new SessionService(prismaSessionRepository)
 const userService = new UserService(userRepository)
 const authService = new AuthService(userService, passwordHasher, sessionService)
 
-
-async function startServer() {
-
-  try {
-    await checkDatabaseConnection();
-    console.log('Connection success');
-
-    app.listen(port, () => {
-      console.log(`Exemple app listening on port ${port}`)
-    });
-  } catch (err) {
-    console.error('Server startup failed:', err);
-    process.exit(1);
-  }
-
-  
-}
-
-startServer();
+app.use(errorMiddleware);
