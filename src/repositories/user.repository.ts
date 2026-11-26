@@ -8,7 +8,7 @@ export interface UserRepository {
   findByUserNickName(nickName: string): Promise<User[]>
   // Частичное обновление разрешенных данных профиля пользователя
   update(id: string, data: Partial<Pick<User, 'nickName' | 'email' | 'avatarKey'>>): Promise<User>
-  create(data: { email: string; passwordHash: string; nickName: string, userName: string, avatarKey?: string | null }): Promise<User>
+  create(data: { email?: string; passwordHash: string; nickName: string, userName: string, avatarKey?: string | null }): Promise<User>
   delete(id: string): Promise<User>
 }
 
@@ -34,7 +34,7 @@ export class PrismaUserRepository implements UserRepository{
     return this.prisma.user.findMany({where: {nickName}})
   }
 
-  async create(data: { email: string; passwordHash: string; nickName: string, userName: string, avatarKey?: string | null }): Promise<User> {
+  async create(data: { email?: string; passwordHash: string; nickName: string, userName: string, avatarKey?: string | null }): Promise<User> {
     try {
        return await this.prisma.user.create({ data });
     } catch (error) {

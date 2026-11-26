@@ -28,23 +28,30 @@ export class AuthService {
     return {token, user: {id: user.id , email: user.email, nickName: user.nickName, userName: user.userName}}
   }
 
-  async registration(createData: { email: string, password: string, nickName: string, userName: string, }): Promise<void> { 
+  async registration(createData: { email?: string, password: string, nickName: string, userName: string, }): Promise<void> { 
     const forbiddenCharsRegex = /^[a-zA-Z0-9_-]{3,20}$/;
     const validUserName = forbiddenCharsRegex.test(createData.userName)
     
     if (!validUserName) {
       throw new AppError(422, 'Invalid username format')
     }
-
-    const checkEmail = await this.userService.getUserByEmail(createData.email)
-    const checkUserName = await this.userService.getUserByUserName(createData.userName)
-    if (checkEmail) {
-      throw new AppError(409, 'This email is already registered')
+    
+    if (typeof createData.password !== 'string' || createData.password.trim() === '') {
+      throw new AppError(422, 'Password must be a non-empty string');
     }
+    
+    if (createData.email !== undefined) {
+      const checkEmail = await this.userService.getUserByEmail(createData.email)
+      if (checkEmail) {
+        throw new AppError(409, 'This email is already registered')
+      }
+    }
+    
+    const checkUserName = await this.userService.getUserByUserName(createData.userName)
     if (checkUserName) {
       throw new AppError(409, 'This username is already taken')
     }
-    
+  
       const passwordHash = await this.passwordHasher.hashPassword(createData.password)
       const data = {
           email: createData.email,

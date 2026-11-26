@@ -50,7 +50,7 @@ export class UserController{
       }
   
       if (typeof nickName === 'string') {
-        const users = await this.userService.getByUserNickName(nickName);
+        const users = await this.userService.getUsers(nickName);
         res.status(200).json(users.map((user) => this.toPublicUser(user)));
         return;
       }
@@ -61,7 +61,7 @@ export class UserController{
     }
   };
   
-  getUserById = async(req: Request, res: Response, next: NextFunction): Promise<void>  => {
+  getMe = async(req: Request, res: Response, next: NextFunction): Promise<void>  => {
     try { 
       const userId = res.locals.userId
       const user = await this.userService.getUserById(userId)
