@@ -65,7 +65,7 @@ export class UserService {
   }
   
   async updateUser(id: string, data: Partial<Pick<User, 'nickName' | 'email' | 'avatarKey'>>) {
-    if (data.email !== undefined) {
+    if (data.email !== undefined && data.email !== null) {
       const normalizedEmail = normalizeAndValidateEmail(data.email)
       if (!normalizedEmail) {
         throw new AppError(422, 'Invalid email format')

@@ -11,14 +11,28 @@ datasource db {
 model User {
   id           String   @id @default(uuid())
   email        String?  @unique
+  phoneNumber  String?  @unique @map("phone_number")
   passwordHash String   @map("password_hash")
   nickName     String
   userName     String   @unique 
   avatarKey    String?  @map("avatar_key")
   createdAt    DateTime @default(now()) @map("created_at")
   sessions     Session[]
+  contacts     Contact[] @relation("ContactOwner")
+  addedBy      Contact[] @relation("ContactTarget")
 
   @@map("users")
+}
+
+model Contact {
+  ownerId       String @map("owner_id")
+  contactUserId String @map("contact_user_id")
+  owner         User   @relation("ContactOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  contactUser   User   @relation("ContactTarget", fields: [contactUserId], references: [id], onDelete: Cascade)
+
+  @@id([ownerId, contactUserId])
+  @@index([contactUserId])
+  @@map("contacts")
 }
 
 model Session {
