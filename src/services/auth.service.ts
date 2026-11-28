@@ -1,4 +1,4 @@
-import type { UserService } from "../services/user.service";
+import { normalizePhoneNumber, type UserService } from "./user.service";
 import type { PasswordHasher } from "../security/password-hasher";
 import type { SessionService } from "./session.service";
 import { AppError } from "../errors/AppError";
@@ -28,7 +28,7 @@ export class AuthService {
     return {token, user: {id: user.id , email: user.email, nickName: user.nickName, userName: user.userName}}
   }
 
-  async registration(createData: { email?: string, password: string, nickName: string, userName: string, }): Promise<void> { 
+  async registration(createData: { email?: string, phoneNumber?: string, password: string, nickName: string, userName: string }): Promise<void> {
     const forbiddenCharsRegex = /^[a-zA-Z0-9_-]{3,20}$/;
     const validUserName = forbiddenCharsRegex.test(createData.userName)
     
@@ -40,6 +40,10 @@ export class AuthService {
       throw new AppError(422, 'Password must be a non-empty string');
     }
     
+    const phoneNumber = createData.phoneNumber === undefined
+      ? undefined
+      : normalizePhoneNumber(createData.phoneNumber);
+
     if (createData.email !== undefined) {
       const checkEmail = await this.userService.getUserByEmail(createData.email)
       if (checkEmail) {
@@ -55,6 +59,7 @@ export class AuthService {
       const passwordHash = await this.passwordHasher.hashPassword(createData.password)
       const data = {
           email: createData.email,
+          phoneNumber,
           passwordHash: passwordHash,
           nickName: createData.nickName,
           userName: createData.userName,

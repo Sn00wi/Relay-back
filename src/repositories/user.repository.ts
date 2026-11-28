@@ -1,14 +1,25 @@
 import { AppError } from '../errors/AppError';
 import { Prisma, PrismaClient, User } from '../generated/prisma/client';
 
+export type CreateUserData = {
+  email?: string;
+  phoneNumber?: string;
+  passwordHash: string;
+  nickName: string;
+  userName: string;
+  avatarKey?: string | null;
+};
+
+export type UpdateUserData = Partial<Pick<User, 'nickName' | 'email' | 'avatarKey' | 'phoneNumber'>>;
+
 export interface UserRepository {
   findByEmail(email: string): Promise<User | null>;
   findByUserName(userName: string): Promise<User | null>;
   findById(id: string): Promise<User | null>;
   findByUserNickName(nickName: string): Promise<User[]>
   // Частичное обновление разрешенных данных профиля пользователя
-  update(id: string, data: Partial<Pick<User, 'nickName' | 'email' | 'avatarKey'>>): Promise<User>
-  create(data: { email?: string; passwordHash: string; nickName: string, userName: string, avatarKey?: string | null }): Promise<User>
+  update(id: string, data: UpdateUserData): Promise<User>
+  create(data: CreateUserData): Promise<User>
   delete(id: string): Promise<User>
 }
 
@@ -34,13 +45,13 @@ export class PrismaUserRepository implements UserRepository{
     return this.prisma.user.findMany({where: {nickName}})
   }
 
-  async create(data: { email?: string; passwordHash: string; nickName: string, userName: string, avatarKey?: string | null }): Promise<User> {
+  async create(data: CreateUserData): Promise<User> {
     try {
        return await this.prisma.user.create({ data });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === "P2002") {
-          throw new AppError(409, "Email or username is already taken.")
+          throw new AppError(409, "Email, username or phone number is already taken.")
         }
       }
     throw error;
@@ -60,7 +71,7 @@ export class PrismaUserRepository implements UserRepository{
     }
   }
   
-  async update(id: string, data: Partial<Pick<User, 'nickName' | 'email' | 'avatarKey'>>): Promise<User> {
+  async update(id: string, data: UpdateUserData): Promise<User> {
     try {
       return await this.prisma.user.update({ where: { id }, data })  
     } catch (error) {
@@ -68,7 +79,7 @@ export class PrismaUserRepository implements UserRepository{
         if (error.code === "P2025") {
           throw new AppError(404, "user not found")
         } else if (error.code === "P2002") {
-          throw new AppError(409, "Email or username is already taken.")
+          throw new AppError(409, "Email, username or phone number is already taken.")
         }
       }
     

@@ -4,7 +4,7 @@ import { UserService } from '../services';
 import { AppError } from '../errors/AppError';
 
 export type PublicUser = Pick<User, 'id' | 'userName' | 'nickName' | 'avatarKey'>;
-export type PrivateUser = Pick<User, 'id' | 'userName' | 'nickName' | 'avatarKey' | 'email'>
+export type PrivateUser = Pick<User, 'id' | 'userName' | 'nickName' | 'avatarKey' | 'email' | 'phoneNumber'>
 
 export class UserController{
   constructor(private readonly userService: UserService) {}
@@ -15,8 +15,8 @@ export class UserController{
   }
 
   private toPrivateUser(user: User): PrivateUser {
-    const { id, userName, nickName, avatarKey, email } = user;
-    return { id, userName, nickName, avatarKey, email };
+    const { id, userName, nickName, avatarKey, email, phoneNumber } = user;
+    return { id, userName, nickName, avatarKey, email, phoneNumber };
   }
 
   
@@ -89,7 +89,7 @@ export class UserController{
        }
    
        const userId = res.locals.userId;
-       const { nickName, email, avatarKey } = req.body;
+       const { nickName, email, avatarKey, phoneNumber } = req.body;
    
        if (nickName !== undefined && typeof nickName !== 'string') {
          throw new AppError(400, 'nickName must be a string');
@@ -103,11 +103,15 @@ export class UserController{
          throw new AppError(400, 'avatarKey must be a string or null');
        }
    
-       if (nickName === undefined && email === undefined && avatarKey === undefined) {
-         throw new AppError(400, 'At least one field (nickName, email, avatarKey) must be provided');
+       if (phoneNumber !== undefined && phoneNumber !== null && typeof phoneNumber !== 'string') {
+         throw new AppError(400, 'phoneNumber must be a string or null');
+       }
+
+       if (nickName === undefined && email === undefined && avatarKey === undefined && phoneNumber === undefined) {
+         throw new AppError(400, 'At least one field (nickName, email, avatarKey, phoneNumber) must be provided');
        }
    
-       const updatedUser = await this.userService.updateUser(userId, { nickName, email, avatarKey });
+       const updatedUser = await this.userService.updateUser(userId, { nickName, email, avatarKey, phoneNumber });
    
        res.status(200).json(this.toPrivateUser(updatedUser));
      } catch (err) {
